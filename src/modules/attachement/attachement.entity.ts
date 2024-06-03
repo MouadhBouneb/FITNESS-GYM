@@ -4,8 +4,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  CreateDateColumn
+  CreateDateColumn,
+  OneToOne
 } from 'typeorm';
+import { User } from '../user/user.entity';
+import { Post } from '../post/post.entity';
 
 @Entity({ name: 'attachements' })
 export class Attachement extends BaseEntity {
@@ -17,16 +20,20 @@ export class Attachement extends BaseEntity {
   extension: string;
   @Column()
   path: string;
-  @Column()
+  @Column({default: null})
   alt: string;
   @Column({ default: true })
   enable: boolean;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
+  @OneToOne(()=>User, (user) => user.photo,{
+    nullable:true,
   })
+  user:User
+  @OneToOne(()=>Post, (post) =>post.photo,{
+    nullable:true,
+  })
+  post:Post
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
   updatedAt: Date;
 }

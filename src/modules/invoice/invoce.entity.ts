@@ -27,13 +27,9 @@ export class Invoice extends BaseEntity {
   totalHT: number;
   @Column({ type: 'float' })
   discountAmount: number;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
   @ManyToOne(() => User, (user) => user.invoices, {
     onDelete: 'CASCADE'

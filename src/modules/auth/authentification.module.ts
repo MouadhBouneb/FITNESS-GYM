@@ -26,6 +26,7 @@ import { UserModule } from '../user/user.module';
     })
   ],
   controllers: [AuthenticationController],
-  providers: [AuthentificationService, LocalStrategy, JwtStrategy]
+  providers: [AuthentificationService, LocalStrategy, JwtStrategy],
+  exports:[AuthentificationService]
 })
 export class AuthentificationModule {}

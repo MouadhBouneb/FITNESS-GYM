@@ -9,6 +9,7 @@ import { CreateUserRequest } from '../../common/validators/user/request/create';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { globalMessages } from 'src/utils/global-messages';
+import { Language } from 'src/common/validators/language';
 
 @Injectable()
 export class AuthentificationService {
@@ -16,7 +17,7 @@ export class AuthentificationService {
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   public getCookieWithJwtToken(userId: number, role: string) {
     const payload: TokenPayload = { userId, role };
@@ -26,10 +27,13 @@ export class AuthentificationService {
     )}`;
   }
 
-  public async register(language: string, registrationData: CreateUserRequest): Promise<User> {
+
+  public async register(language: string, registrationData: CreateUserRequest): Promise<Object> {
     const createdUser = await this.usersService.create(language, registrationData);
     createdUser.password = undefined;
-    return createdUser;
+    console.log(createdUser);
+    const token = this.getCookieWithJwtToken(createdUser.id, createdUser.role);
+    return { "user": createdUser, "token": token };
   }
 
   public async getAuthenticatedUser(
@@ -67,4 +71,29 @@ export class AuthentificationService {
   public getCookieForLogOut() {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
+  public async verifyToken(
+    language: string,
+    cookie: string
+  ) {
+    
+    const token = cookie?.[0].split(';')[0].split('=')[1];
+    const decodedUser = this.jwtService.decode(token)
+    console.log(decodedUser);
+    
+    if (!decodedUser){
+      throw new HttpException(
+        globalMessages[language].error.unableToVerifyToken,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    const user = await this.usersService.GetOne(decodedUser.id);
+    if (!user) {
+      throw new HttpException(
+        globalMessages[language].error.unableToVerifyToken,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    return user;
+  }
+
 }

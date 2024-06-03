@@ -20,7 +20,7 @@ import { MembershipPriceService } from './membership-price.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import JwtAuthenticationGuard from '../auth/jwt-authentication.guard';
 import { RoleGuard } from '../auth/role.guard';
-import { CreateMembershipPriceRequest } from 'src/common/validators/membership-price/create';
+import { CreateMembershipRequest } from 'src/common/validators/membership-price/create';
 import { UpdateMembershipPriceRequest } from 'src/common/validators/membership-price/update';
 
 @ApiTags('membership-prices')
@@ -33,11 +33,11 @@ export class MembershipPriceController {
   @UseGuards(JwtAuthenticationGuard, RoleGuard)
   @UsePipes(new ValidationPipe())
   @ApiBody({
-    type: CreateMembershipPriceRequest,
+    type: CreateMembershipRequest,
     description: 'Json structure for taxe object'
   })
-  create(@Body() createMembershipPriceRequest: CreateMembershipPriceRequest) {
-    return this.membershipPriceService.create(createMembershipPriceRequest);
+  create(@Body() CreateMembershipRequest: CreateMembershipRequest) {
+    return this.membershipPriceService.create(CreateMembershipRequest);
   }
   @Roles('ROOT', 'ADMIN')
   @Put(':id')

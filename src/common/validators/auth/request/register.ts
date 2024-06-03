@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterRequest {
-  @MinLength(1)
-  @MaxLength(150)
+  @MinLength(3)
+  @MaxLength(50)
   @IsString()
   @ApiProperty({
     example: 'mouadh',
@@ -21,7 +21,7 @@ export class RegisterRequest {
   email: string;
 
   @MinLength(3)
-  @MaxLength(150)
+  @MaxLength(20)
   @IsString()
   @IsOptional()
   @ApiProperty({

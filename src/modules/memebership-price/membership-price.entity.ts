@@ -23,13 +23,9 @@ export class MembershipPrice extends BaseEntity {
   discount: number;
   @Column({ default: true })
   enable: boolean;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
   @ManyToOne(() => MembershipType, (membershipType) => membershipType.membershipPrices, {
     onDelete: 'CASCADE'

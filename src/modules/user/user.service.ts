@@ -5,12 +5,16 @@ import { User } from './user.entity';
 import { CreateUserRequest } from '../../common/validators/user/request/create';
 import { UpdateUserRequest } from '../../common/validators/user/request/update';
 import { globalMessages } from 'src/utils/global-messages';
+import { JwtService } from '@nestjs/jwt';
+import { AttachementService } from '../attachement/attachement.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>
+    private userRepository: Repository<User>,
+    private jwtService : JwtService,
+    private attachmentService: AttachementService
   ) {}
 
   async GetOne(id: number) {
@@ -21,6 +25,20 @@ export class UserService {
     });
     return user;
   }
+  async DecodeAndGet(language:string,token:string):Promise<User>{
+
+    const decodedUser = await this.jwtService.decode(token)
+    if (!decodedUser)
+      {
+        throw new HttpException(
+          globalMessages[language].error.unauthorized,
+          HttpStatus.UNAUTHORIZED
+        )
+      }
+    
+    return this.GetOne(decodedUser.id)
+  }
+
   async getByEmail(email: string) {
     const user = await this.userRepository.findOne({
       where: {
@@ -53,9 +71,12 @@ export class UserService {
         );
       }
 
+      console.log(createUserRequest);
+
       const user = this.userRepository.create({
         ...createUserRequest
       });
+      
       await this.userRepository.save(user);
       return user;
     } catch (error) {
@@ -96,7 +117,14 @@ export class UserService {
       );
     }
   }
+  async setPhoto(language:string,user:User,photo:Express.Multer.File)
+  {
+    const updatedUser = this.userRepository.update(user.id,
+      await this.attachmentService.createUserImage(user.id,photo))  
+    console.log(updatedUser)
+    return 'aa'
 
+  }
   async delete(language: string, id: number) {
     try {
       const userdeleted = await this.userRepository.delete({ id: id });
@@ -109,4 +137,5 @@ export class UserService {
       );
     }
   }
+ 
 }

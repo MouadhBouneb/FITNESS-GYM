@@ -19,13 +19,9 @@ export class MembershipExtension extends BaseEntity {
   id: number;
   @Column({ default: 0 })
   length: number;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
   @ManyToOne(() => Membership, (membership) => membership.membershipExtensions, {
     onDelete: 'CASCADE'

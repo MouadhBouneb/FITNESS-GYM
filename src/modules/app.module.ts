@@ -6,7 +6,7 @@ import { MemebershipExtensionModule } from './memebership-extension/memebership-
 import { MembershipModule } from './membership/membership.module';
 import { LikeModule } from './like/like.module';
 import { InvoiceModule } from './invoice/invoice.module';
-import { ModuleModule } from './comment/module.module';
+import { ModuleModule } from './comment/comment.module';
 import { AttachementModule } from './attachement/attachement.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -18,10 +18,12 @@ import { ConfigService } from '@nestjs/config';
 import { LanguageMiddleware } from 'src/common/middlewares/language.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { AuthentificationModule } from './auth/authentification.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     ConfigModule.forRoot(), // Add this line
+    AuthentificationModule,
     databaseConfig(new ConfigService()),
     MembershipTypeModule,
     UserModule,
@@ -34,7 +36,6 @@ import { AuthentificationModule } from './auth/authentification.module';
     LikeModule,
     InvoiceModule,
     ModuleModule,
-    AuthentificationModule,
     AttachementModule
   ],
   controllers: [AppController],

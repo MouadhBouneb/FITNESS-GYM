@@ -1,7 +1,6 @@
 import { IsEnum } from 'class-validator';
 
 export enum Language {
-  ar = 'ar',
   en = 'en',
   fr = 'fr'
 }

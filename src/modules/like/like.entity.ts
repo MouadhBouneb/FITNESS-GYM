@@ -15,7 +15,7 @@ import { Post } from '../post/post.entity';
 export class Like extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
   @ManyToOne(() => User, (user) => user.likes, {
     onDelete: 'CASCADE'

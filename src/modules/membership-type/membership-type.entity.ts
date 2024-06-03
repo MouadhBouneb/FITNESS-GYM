@@ -26,13 +26,9 @@ export class MembershipType extends BaseEntity {
   nameAr: string;
   @Column({ default: true })
   enable: boolean;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
   @ManyToOne(() => Attachement, { nullable: true, onDelete: 'CASCADE' })
   attachement: Attachement;

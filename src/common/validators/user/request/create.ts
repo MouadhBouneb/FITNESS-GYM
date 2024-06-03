@@ -6,8 +6,8 @@ export class CreateUserRequest {
     example: 'mouadh',
     description: 'Full name'
   })
-  @MinLength(1)
-  @MaxLength(150)
+  @MinLength(3)
+  @MaxLength(30)
   @IsString()
   fullName: string;
 
@@ -15,8 +15,8 @@ export class CreateUserRequest {
     example: '..@gmail.com',
     description: 'Email address'
   })
-  @MinLength(20)
-  @MaxLength(150)
+  @MinLength(10)
+  @MaxLength(90)
   @IsEmail()
   email: string;
 
@@ -60,6 +60,7 @@ export class CreateUserRequest {
     example: '********',
     description: 'Password'
   })
+  @MaxLength(40)
   @MinLength(8)
   password: string;
 

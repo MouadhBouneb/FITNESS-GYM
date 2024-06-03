@@ -6,7 +6,7 @@ https://docs.nestjs.com/providers#services
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MembershipPrice } from './membership-price.entity';
-import { CreateMembershipPriceRequest } from 'src/common/validators/membership-price/create';
+import { CreateMembershipRequest } from 'src/common/validators/membership-price/create';
 import { UpdateMembershipPriceRequest } from 'src/common/validators/membership-price/update';
 
 @Injectable()
@@ -17,10 +17,10 @@ export class MembershipPriceService {
   ) {}
 
   async create(
-    createMembershipPriceRequest: CreateMembershipPriceRequest
+    CreateMembershipRequest: CreateMembershipRequest
   ): Promise<MembershipPrice> {
     const createdMembershipPrice: MembershipPrice = this.MembershipPriceRepository.create(
-      createMembershipPriceRequest
+      CreateMembershipRequest
     );
     return this.MembershipPriceRepository.save(createdMembershipPrice);
   }

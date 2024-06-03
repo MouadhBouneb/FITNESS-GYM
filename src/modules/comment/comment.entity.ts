@@ -16,23 +16,15 @@ export class Comment extends BaseEntity {
   id: number;
   @Column({ type: 'text' })
   comment: string;
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
-  @ManyToOne(() => Post, (post) => post.comments, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => Post, (post) => post.comments)
   post: Post;
   @Column()
   postId: number; // Foreign key
-  @ManyToOne(() => User, (user) => user.comments, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => User, (user) => user.comments)
   user: User;
   @Column()
   userId: number; // Foreign key
