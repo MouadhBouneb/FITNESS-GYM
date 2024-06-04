@@ -56,7 +56,7 @@ export class User extends BaseEntity {
   @MaxLength(20)
   @IsString()
   role: string;
-  @OneToOne(()=>Attachement, (photo) => photo.user,{nullable:true,cascade:true})
+  @OneToOne(()=>Attachement, (photo) => photo.user,{nullable:true})
   photo:Attachement
   @Column({ default: 0 })
   weight: number;

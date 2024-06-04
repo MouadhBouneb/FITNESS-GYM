@@ -31,7 +31,8 @@ export const globalMessages = {
     success: {
       login: 'Logged in successfully',
       logout: 'Logged out successfully',
-      register: 'Registration successful'
+      register: 'Registration successful',
+      checkingForTimeOuts: 'Checking for activity timeouts'
     },
     error: {
       missingPhoto: 'Photo is missing from the request',

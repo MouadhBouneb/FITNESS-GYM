@@ -1,7 +1,7 @@
 import { Body, Controller, Headers, HttpException, HttpStatus, Injectable, Post, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommentService } from "./comment.service";
 import JwtAuthenticationGuard from "../auth/jwt-authentication.guard";
-import { CreateCommentRequest } from "src/common/validators/comment/Request/create";
+import { CreateCommentRequest } from "src/common/validators/comment/request/create";
 import { globalMessages } from "src/utils/global-messages";
 import { Language } from "src/common/validators/language";
 

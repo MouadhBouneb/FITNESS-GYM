@@ -24,13 +24,9 @@ export class Attachement extends BaseEntity {
   alt: string;
   @Column({ default: true })
   enable: boolean;
-  @OneToOne(()=>User, (user) => user.photo,{
-    nullable:true,
-  })
+  @OneToOne(()=>User, (user) => user.photo,{nullable:true,cascade:true, onDelete: 'CASCADE'})
   user:User
-  @OneToOne(()=>Post, (post) =>post.photo,{
-    nullable:true,
-  })
+  @OneToOne(()=>Post, (post) =>post.photo,{nullable:true,cascade:true, onDelete: 'CASCADE'})
   post:Post
   @CreateDateColumn()
   createdAt: Date;

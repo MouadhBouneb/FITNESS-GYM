@@ -12,6 +12,9 @@ import { Post } from 'src/modules/post/post.entity';
 import { ReferenceStub } from 'src/modules/reference-stub/reference-stub.entity';
 import { Taxe } from 'src/modules/taxe/taxe.entity';
 import { User } from 'src/modules/user/user.entity';
+import { Plan } from 'src/modules/plan/plan.entity';
+import { Activity } from 'src/modules/activity/activity.entity';
+import { SubActivity } from 'src/modules/sub-activity/sub-activity.entity';
 
 export const databaseConfig = (configService: ConfigService) =>
   TypeOrmModule.forRoot({
@@ -33,7 +36,10 @@ export const databaseConfig = (configService: ConfigService) =>
       ReferenceStub,
       Taxe,
       User,
-      Invoice
+      Invoice,
+      Plan,
+      Activity,
+      SubActivity,
     ],
     synchronize: true
   });

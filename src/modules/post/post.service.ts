@@ -12,7 +12,8 @@ import { AttachementService } from "../attachement/attachement.service";
 @Injectable()
 export class PostService {
     constructor(@InjectRepository(Post) private postRepository: Repository<Post>,
-private readonly attachmentService: AttachementService) {}
+        private readonly attachmentService: AttachementService
+    ) { }
     async getAll(language: Language, query: PaginateQuery): Promise<Paginated<Post>> {
         if (!query) {
             throw new HttpException(
@@ -21,14 +22,14 @@ private readonly attachmentService: AttachementService) {}
             )
         }
         const paginatedResult = await paginate(query, this.postRepository, {
-            relations:['comments','likes','photo'],
+            relations: ['comments', 'likes', 'photo'],
             sortableColumns: ["updatedAt"],
             defaultSortBy: [["updatedAt", "DESC"]],
             defaultLimit: 10,
             maxLimit: 50
         })
         console.log(paginatedResult?.data);
-        
+
         if (!paginatedResult?.data || !(paginatedResult?.data?.length > 0)) {
             throw new HttpException(
                 globalMessages[language].error.noPostsFound,
@@ -42,7 +43,7 @@ private readonly attachmentService: AttachementService) {}
 
         const createdPost = this.postRepository.create(post)
         const createdPhoto = await this.attachmentService.createPostImage(createdPost.id, image)
-        const newPost = { ...createdPost,photo: createdPhoto }
+        const newPost = { ...createdPost, photo: createdPhoto }
 
         return await this.postRepository.save(newPost)
     }
@@ -51,8 +52,8 @@ private readonly attachmentService: AttachementService) {}
         return this.postRepository.delete(id);
     }
 
-    async getOne(id:number){
-        return this.postRepository.findOneBy({id:id})
+    async getOne(id: number) {
+        return this.postRepository.findOneBy({ id: id })
     }
 
 }

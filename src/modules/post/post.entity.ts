@@ -32,13 +32,13 @@ export class Post extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-  @OneToOne(() => Attachement, (photo) => photo.post, { nullable: true, cascade: true })
+  @OneToOne(() => Attachement, (photo) => photo.post, { nullable: true})
   @JoinColumn({ name: 'photo' })
   photo: Attachement
-  @OneToMany(() => Comment, (comment) => comment.post, { nullable: true, cascade: true })
+  @OneToMany(() => Comment, (comment) => comment.post, { nullable: true})
   @JoinColumn({ name: 'comments' })
   comments: Array<Comment>;
-  @OneToMany(() => Like, (like) => like.post, { nullable: true, cascade: true })
+  @OneToMany(() => Like, (like) => like.post, { nullable: true})
   @JoinColumn({ name: 'likes' })
   likes: Array<Like>;
   @AfterUpdate()

@@ -19,14 +19,22 @@ import { LanguageMiddleware } from 'src/common/middlewares/language.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { AuthentificationModule } from './auth/authentification.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PlanModule } from './plan/plan.module';
+import { ActivityModule } from './activity/activity.module';
+import { SubActivityModule } from './sub-activity/sub-activity.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot(), // Add this line
+    ScheduleModule.forRoot(),
     AuthentificationModule,
     databaseConfig(new ConfigService()),
     MembershipTypeModule,
     UserModule,
+    PlanModule,
+    ActivityModule,
+    SubActivityModule,
     TaxeModule,
     ReferenceStubModule,
     PostModule,
@@ -36,7 +44,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     LikeModule,
     InvoiceModule,
     ModuleModule,
-    AttachementModule
+    AttachementModule,
+    PlanModule,
+    ActivityModule,
+    SubActivityModule
   ],
   controllers: [AppController],
   providers: [AppService]
