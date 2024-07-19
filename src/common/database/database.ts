@@ -15,6 +15,7 @@ import { User } from 'src/modules/user/user.entity';
 import { Plan } from 'src/modules/plan/plan.entity';
 import { Activity } from 'src/modules/activity/activity.entity';
 import { SubActivity } from 'src/modules/sub-activity/sub-activity.entity';
+import { Weight } from 'src/modules/weight/weight.entity';
 
 export const databaseConfig = (configService: ConfigService) =>
   TypeOrmModule.forRoot({
@@ -40,6 +41,7 @@ export const databaseConfig = (configService: ConfigService) =>
       Plan,
       Activity,
       SubActivity,
+      Weight,
     ],
     synchronize: true
   });

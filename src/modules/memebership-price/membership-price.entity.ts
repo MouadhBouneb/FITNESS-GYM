@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   CreateDateColumn,
-  ManyToOne
+  ManyToOne,JoinColumn
 } from 'typeorm';
 import { MembershipType } from '../membership-type/membership-type.entity';
 
@@ -27,10 +27,7 @@ export class MembershipPrice extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-  @ManyToOne(() => MembershipType, (membershipType) => membershipType.membershipPrices, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => MembershipType, (membershipType) => membershipType.membershipPrices, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'membership_type' })
   membershipType: MembershipType;
-  @Column()
-  membershipTypeId: number; // Foreign key
 }

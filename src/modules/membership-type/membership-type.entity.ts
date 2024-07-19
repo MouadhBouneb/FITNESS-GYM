@@ -8,7 +8,8 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  JoinColumn
 } from 'typeorm';
 import { Attachement } from '../attachement/attachement.entity';
 import { Membership } from '../membership/membership.entity';
@@ -22,8 +23,6 @@ export class MembershipType extends BaseEntity {
   nameFr: string;
   @Column()
   nameEn: string;
-  @Column()
-  nameAr: string;
   @Column({ default: true })
   enable: boolean;
   @CreateDateColumn()
@@ -31,9 +30,8 @@ export class MembershipType extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
   @ManyToOne(() => Attachement, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'background_image' })
   attachement: Attachement;
-  @Column({ nullable: true })
-  attachementId: number; // Foreign key
   @OneToMany(() => Membership, (membership) => membership.membershipType)
   memberships: Array<Membership>;
   @OneToMany(() => MembershipPrice, (membershipPrice) => membershipPrice.membershipType)

@@ -2,19 +2,19 @@
 https://docs.nestjs.com/providers#services
 */
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Taxe } from './taxe.entity';
 import { CreateTaxeRequest } from '../../common/validators/taxe/request/create';
 import { UpdateTaxeRequest } from '../../common/validators/taxe/request/update';
 
 @Injectable()
-export class TaxeService {
+export class TaxeService  {
   constructor(
     @InjectRepository(Taxe)
     private taxeRepository: Repository<Taxe>
   ) {}
-
+ 
   async create(createTaxeRequest: CreateTaxeRequest): Promise<Taxe> {
     const createdTaxe: Taxe = this.taxeRepository.create(createTaxeRequest);
     return this.taxeRepository.save(createdTaxe);

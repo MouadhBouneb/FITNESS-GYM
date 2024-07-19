@@ -30,11 +30,18 @@ import { globalMessages } from 'src/utils/global-messages';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptionsUserPhoto } from 'src/utils/photo-upload-config';
 import JwtAuthenticationGuard from '../auth/jwt-authentication.guard';
+import { JwtService } from '@nestjs/jwt';
+import { Language } from 'src/common/validators/language';
+import { AttachementService } from '../attachement/attachement.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly attachmentService: AttachementService,
+    private readonly jwtService: JwtService
+  ) {}
 
   @Roles('ROOT', 'ADMIN')
   @Post()
@@ -48,11 +55,71 @@ export class UserController {
     return this.userService.create(request['lang'], userDto);
   }
 
+  @Get('/memberships')
+  @UseGuards(JwtAuthenticationGuard)
+  async getMembership(@Req() request: Request, @Headers() headers: any) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    const token = request.cookies?.Authentication;
+    const decodedUser = await this.jwtService.decode(token);
+    if (!decodedUser) {
+      throw new HttpException(
+        globalMessages[request['lang']].error.unauthorized,
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+
+    return this.userService.getMemberships(decodedUser.userId);
+  }
+
+  @Post('join/:id')
+  @UseGuards(JwtAuthenticationGuard)
+  async joinActivity(
+    @Req() request: Request,
+    @Headers() headers: any,
+    @Param('id', new ParseIntPipe()) activityId: number
+  ) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    const token = request.cookies?.Authentication;
+    const decodedUser = await this.jwtService.decode(token);
+    if (!decodedUser) {
+      throw new HttpException(
+        globalMessages[request['lang']].error.unauthorized,
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+    
+    return this.userService.joinActivity(language, activityId, decodedUser.userId);
+  }
+
   @Roles('ROOT', 'ADMIN')
   @Get()
   @UseGuards(JwtAuthenticationGuard, RoleGuard)
   getUsers() {
     return this.userService.GetAll();
+  }
+  @Get('statistics')
+  @UseGuards(JwtAuthenticationGuard)
+  async getStatistics(@Req() request: Request, @Headers() headers: any) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    const token = request.cookies?.Authentication;
+    const decodedUser = await this.jwtService.decode(token);
+
+    if (!decodedUser) {
+      throw new HttpException(
+        globalMessages[request['lang']].error.unauthorized,
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+    return this.userService.getStatistics(decodedUser.userId, language);
   }
 
   @Get(':id')
@@ -62,8 +129,37 @@ export class UserController {
     required: true,
     example: 1
   })
-  getUserByID(@Param('id', ParseIntPipe) id: number) {
+  getUserByID(@Param('id', new ParseIntPipe()) id: number) {
     return this.userService.GetOne(id);
+  }
+
+  @Put()
+  @UseGuards(JwtAuthenticationGuard)
+  @UsePipes(new ValidationPipe())
+  @ApiBody({ type: UpdateUserRequest, description: 'Json structure for user object' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    example: 1
+  })
+  async updateUser(
+    @Req() request: Request,
+    @Body() userDto: UpdateUserRequest,
+    @Headers() headers: any
+  ) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    const token = request.cookies?.Authentication;
+    const decodedUser = await this.jwtService.decode(token);
+    if (!decodedUser) {
+      throw new HttpException(
+        globalMessages[request['lang']].error.unauthorized,
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+    return this.userService.update(language, decodedUser.userId, userDto);
   }
   @Get(':email')
   @UseGuards(JwtAuthenticationGuard)
@@ -75,49 +171,39 @@ export class UserController {
   getUserByEmail(@Param('email') email: string) {
     return this.userService.getByEmail(email);
   }
-
+  //maysa
   @UseGuards(JwtAuthenticationGuard)
   @UseInterceptors(FileInterceptor('file', multerOptionsUserPhoto))
-  @Post(':id/upload-photo')
-  async uploadPhoto(@UploadedFile() file: Express.Multer.File, @Headers() headers:Object): Promise<string> {
-    if (!headers['accept-language']) {
-      throw new HttpException(
-        globalMessages['fr'].error.missingLanguage,
-        HttpStatus.UNAUTHORIZED
-      );
+  @Post('photo')
+  async uploadPhoto(
+    @UploadedFile() file: Express.Multer.File,
+    @Headers() headers: any,
+    @Req() request: Request,  ) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
     }
-    const token = headers['set-cookie']
-    const language = headers['accept-language']
-    const user = await this.userService.DecodeAndGet(language,token)
-    if (!user)
-      {
-        throw new HttpException(
-          globalMessages[language].error.unauthorized,
-          HttpStatus.UNAUTHORIZED
-        )
-      }
-    const base64Photo = this.userService.setPhoto(language, user, file)
-    return base64Photo
+    const token = request.cookies?.Authentication;
+    const decodedUser = await this.jwtService.decode(token);
+    const user = await this.userService.GetOneWithPhoto(decodedUser.userId);
+    if (!user) {
+      this.attachmentService.deleteImage(file);
+      throw new HttpException(globalMessages[language].error.unauthorized, HttpStatus.UNAUTHORIZED);
+    }
+    const base64Photo = this.userService.setPhoto(language, user, file);
+    return base64Photo;
   }
-  @Put(':id')
+
   @UseGuards(JwtAuthenticationGuard)
-  @UsePipes(new ValidationPipe())
-  @ApiBody({
-    type: UpdateUserRequest,
-    description: 'Json structure for user object'
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    example: 1
-  })
-  updateUser(
-    @Req() request: Request,
-    @Body() userDto: UpdateUserRequest,
-    @Param('id', ParseIntPipe) id: number
-  ) {
-    return this.userService.update(request['lang'], id, userDto);
+  @Get(':id/photo')
+  async getPhoto(@Headers() headers: any, @Param('id', new ParseIntPipe()) id: number) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    return await this.userService.getPhoto(language, id);
   }
+
   @Roles('ROOT', 'ADMIN')
   @Delete(':id')
   @UseGuards(JwtAuthenticationGuard, RoleGuard)
@@ -126,8 +212,7 @@ export class UserController {
     required: true,
     example: 1
   })
-  deleteUserByID(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
+  deleteUserByID(@Req() request: Request, @Param('id', new ParseIntPipe()) id: number) {
     return this.userService.delete(request['lang'], id);
   }
-
 }

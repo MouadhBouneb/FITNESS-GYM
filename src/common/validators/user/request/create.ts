@@ -11,6 +11,10 @@ export class CreateUserRequest {
   @IsString()
   fullName: string;
 
+  @MinLength(1)
+  @MaxLength(150)
+  @IsString()
+  code: string;
   @ApiProperty({
     example: '..@gmail.com',
     description: 'Email address'

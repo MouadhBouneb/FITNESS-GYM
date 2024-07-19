@@ -61,6 +61,29 @@ export const multerOptionsPostPhotos = {
     }),
 };
 
+export const multerOptionsMembershipTypePhoto = {
+    limits: {
+        fileSize: 4*1024*1024, 
+    },
+    fileFilter: (req: any, file: any, cb: any) => {
+        console.log(file.mimetype);
+        
+        if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+            cb(null, true);
+        } else {
+            cb(new HttpException(`Unsupported file type ${extname(file.originalname)}`, HttpStatus.BAD_REQUEST), false);
+        }
+    },
+    storage: diskStorage({
+        destination: './uploads/membership-type-photos',
+        filename: (req: any, file: any, cb: any) => {
+            const extentsion = extname(file.originalname)
+            const filename = file.originalname.replace(extentsion,'')
+            cb(null, `${generateRandomName(filename)}${extentsion}`);
+        },
+    }),
+};
+
 const generateRandomName = (filename:string):string =>{
     const date = new Date();
     const dateSalt = `${date.getDay()}-${date.getMonth()}-${date.getFullYear()}`

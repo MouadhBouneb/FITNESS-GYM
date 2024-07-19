@@ -10,11 +10,12 @@ import { RegisterRequest } from '../../common/validators/auth/request/register';
 import { LoginRequest } from '../../common/validators/auth/request/login';
 import { globalMessages } from 'src/utils/global-messages';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { Language } from 'src/common/validators/language';
 
 @ApiTags('authentication')
 @Controller('authentication')
 export class AuthenticationController {
-  constructor(private readonly authenticationService: AuthentificationService) { }
+  constructor(private readonly authenticationService: AuthentificationService) {}
 
   @Post('register')
   @ApiBody({
@@ -22,17 +23,15 @@ export class AuthenticationController {
     description: 'Json structure for auth object'
   })
   async register(
-    @Headers() headers:Object,
-    @Body() registrationData: RegisterRequest, @Res() response: Response
+    @Headers() headers: any,
+    @Body() registrationData: RegisterRequest,
+    @Res() response: Response
   ): Promise<Response> {
-    if (!headers['accept-language']) {
-      throw new HttpException(
-        globalMessages['fr'].error.missingLanguage,
-        HttpStatus.UNAUTHORIZED
-      );
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
     }
-    const language = headers['accept-language']
-    const register = await this.authenticationService.register(language, registrationData)
+    const register = await this.authenticationService.register(language, registrationData);
     response.setHeader('set-cookie', register['token']);
     return response.send(register['user']);
   }
@@ -43,28 +42,21 @@ export class AuthenticationController {
     type: LoginRequest,
     description: 'Json structure for auth object'
   })
-  async logIn(@Headers() headers:Object, @Body() login: LoginRequest, @Res() response: Response): Promise<Response> {
-
-    if (!headers['accept-language']) {
-      throw new HttpException(
-        globalMessages['fr'].error.missingLanguage,
-        HttpStatus.UNAUTHORIZED
-      );
+  async logIn(
+    @Headers() headers: any,
+    @Body() login: LoginRequest,
+    @Res() response: Response
+  ): Promise<Response> {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
     }
-    const language = headers['accept-language']
-    if (!login.login || !login.password) {
-      throw new HttpException(
-        globalMessages[language].error.miss,
-        HttpStatus.UNAUTHORIZED
-      );
-    }
-    console.log(login);
-
     const user: User = await this.authenticationService.getAuthenticatedUser(
       language,
-      login.login,
+      login.login.toLowerCase(),
       login.password
     );
+
     if (!user.enable) {
       throw new HttpException(
         globalMessages[language].error.accountLocked,
@@ -73,7 +65,6 @@ export class AuthenticationController {
     }
     const cookie = this.authenticationService.getCookieWithJwtToken(user.id, user.role);
     response.setHeader('set-cookie', cookie);
-    user.password = undefined;
 
     return response.send(user).status(200);
   }
@@ -85,38 +76,24 @@ export class AuthenticationController {
     response.setHeader('set-cookie', this.authenticationService.getCookieForLogOut());
     return response.sendStatus(200);
   }
-  
-  @UsePipes(new ValidationPipe())
+
   @UseGuards(JwtAuthenticationGuard)
-  @Get()
-  async authenticate(@Headers() headers:Object, @Res() response: Response) {
-    if (!headers['accept-language']) {
-      throw new HttpException(
-        globalMessages['fr'].error.missingLanguage,
-        HttpStatus.UNAUTHORIZED
-      );
+  @Get('')
+  async authenticate(@Headers() headers: any, @Req() request: Request, @Res() response: Response) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
     }
-    const language = headers['accept-language']
 
-    if (!headers['set-cookie']) {
-      throw new HttpException(
-        globalMessages[language].error.verificationFailed,
-        HttpStatus.UNAUTHORIZED
-      );
-    }
-    const cookie = headers['set-cookie'];
-    console.log(cookie);
-
+    const cookie = request?.cookies?.Authentication;
     const user: User = await this.authenticationService.verifyToken(language, cookie);
     if (!user) {
       throw new HttpException(
-        globalMessages[language].error.verificationFailed,
+        globalMessages[language].error.unableToVerifyToken,
         HttpStatus.UNAUTHORIZED
       );
     }
-    user.password=null
-    return response.send(user).status(200)
+    user.password = null;
+    return response.send(user).status(200);
   }
-
-
 }

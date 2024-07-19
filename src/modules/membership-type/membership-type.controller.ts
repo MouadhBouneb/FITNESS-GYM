@@ -3,11 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   ParseIntPipe,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
@@ -18,6 +21,9 @@ import { RoleGuard } from '../auth/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateMembershipTypeRequest } from 'src/common/validators/membership-type/request/create';
 import { UpdateMembershipTypeRequest } from 'src/common/validators/membership-type/request/update';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptionsMembershipTypePhoto } from 'src/utils/photo-upload-config';
+import { Language } from 'src/common/validators/language';
 @ApiTags('membership-types')
 @Controller('membership-types')
 export class MembershipTypeController {
@@ -31,8 +37,26 @@ export class MembershipTypeController {
     type: CreateMembershipTypeRequest,
     description: 'Json structure for taxe object'
   })
-  create(@Body() CreateMembershipTypeRequest: CreateMembershipTypeRequest) {
-    return this.membershipTypeService.create(CreateMembershipTypeRequest);
+  @UseInterceptors(FileInterceptor('file', multerOptionsMembershipTypePhoto))
+  async create(
+    @Body() CreateMembershipTypeRequest: CreateMembershipTypeRequest,
+    @UploadedFile() file?: Express.Multer.File,
+    @Headers() headers?: any
+  ) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    const memberShipType = await this.membershipTypeService.create(CreateMembershipTypeRequest);
+    const returnMemberShip: any = memberShipType;
+    console.log(memberShipType);
+
+    returnMemberShip['photo'] = await this.membershipTypeService.setPhoto(
+      language,
+      memberShipType,
+      file
+    );
+    return returnMemberShip;
   }
   @Roles('ROOT', 'ADMIN')
   @Put(':id')
@@ -57,11 +81,23 @@ export class MembershipTypeController {
     return this.membershipTypeService.update(id, UpdateMembershipTypeRequest);
   }
   @Get('')
-  @UseGuards(JwtAuthenticationGuard)
-  @UsePipes(new ValidationPipe())
-  findAll() {
-    return this.membershipTypeService.findAll();
+  findAll(@Headers() headers?: any) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    return this.membershipTypeService.findAll(language);
   }
+
+  @Get('without-images')
+  getMemebershipTypesWithoutImages(@Headers() headers: any) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    return this.membershipTypeService.findAllWithoutImages(language);
+  }
+  
   @Get(':id')
   @UseGuards(JwtAuthenticationGuard)
   @UsePipes(new ValidationPipe())
@@ -73,16 +109,22 @@ export class MembershipTypeController {
   findById(@Param('id', ParseIntPipe) id: number) {
     return this.membershipTypeService.findById(id);
   }
-  @Roles('ROOT', 'ADMIN')
+
+  @Roles('ADMIN', 'ROOT')
   @Delete(':id')
   @UseGuards(JwtAuthenticationGuard)
-  @UsePipes(new ValidationPipe())
   @ApiParam({
     name: 'id',
     required: true,
     example: 1
   })
   deleteById(@Param('id', ParseIntPipe) id: number) {
+    console.log(id);
+
     return this.membershipTypeService.deleteById(id);
+  }
+  @Get(':id/prices')
+  getMembershipPrices(@Param('id', ParseIntPipe) id: number) {
+    return this.membershipTypeService.getMembershipPrices(id);
   }
 }

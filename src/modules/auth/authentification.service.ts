@@ -9,7 +9,6 @@ import { CreateUserRequest } from '../../common/validators/user/request/create';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { globalMessages } from 'src/utils/global-messages';
-import { Language } from 'src/common/validators/language';
 
 @Injectable()
 export class AuthentificationService {
@@ -28,7 +27,7 @@ export class AuthentificationService {
   }
 
 
-  public async register(language: string, registrationData: CreateUserRequest): Promise<Object> {
+  public async register(language: string, registrationData: CreateUserRequest): Promise<any> {
     const createdUser = await this.usersService.create(language, registrationData);
     createdUser.password = undefined;
     console.log(createdUser);
@@ -60,7 +59,6 @@ export class AuthentificationService {
   ) {
     const isPasswordMatching = await bcrypt.compare(plainTextPassword, hashedPassword);
     if (!isPasswordMatching) {
-      console.log('isPasswordMatching');
       throw new HttpException(
         globalMessages[language].error.wrongCredentials,
         HttpStatus.BAD_REQUEST
@@ -75,18 +73,17 @@ export class AuthentificationService {
     language: string,
     cookie: string
   ) {
-    
-    const token = cookie?.[0].split(';')[0].split('=')[1];
-    const decodedUser = this.jwtService.decode(token)
-    console.log(decodedUser);
-    
-    if (!decodedUser){
+
+    const decodedUser = this.jwtService.decode(cookie)
+    if (!decodedUser) {
       throw new HttpException(
         globalMessages[language].error.unableToVerifyToken,
         HttpStatus.BAD_REQUEST
       );
     }
     const user = await this.usersService.GetOne(decodedUser.id);
+    console.log(user);
+    
     if (!user) {
       throw new HttpException(
         globalMessages[language].error.unableToVerifyToken,

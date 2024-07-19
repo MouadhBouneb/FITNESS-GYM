@@ -5,7 +5,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   ManyToOne,
-  UpdateDateColumn
+  UpdateDateColumn,
+  JoinColumn
 } from 'typeorm';
 import { Post } from '../post/post.entity';
 import { User } from '../user/user.entity';
@@ -20,12 +21,10 @@ export class Comment extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-  @ManyToOne(() => Post, (post) => post.comments,{cascade:true, onDelete: 'CASCADE'})
+  @ManyToOne(() => Post, (post) => post.comments, { cascade: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'Post' })
   post: Post;
-  @Column()
-  postId: number; // Foreign key
-  @ManyToOne(() => User, (user) => user.comments,{cascade:true, onDelete: 'CASCADE'})
+  @ManyToOne(() => User, (user) => user.comments, { cascade: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user' })
   user: User;
-  @Column()
-  userId: number; // Foreign key
 }

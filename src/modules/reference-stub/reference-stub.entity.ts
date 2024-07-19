@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 
-@Entity({ name: 'reference_stubs' })
+@Entity({ name: 'reference_stubs'})
 export class ReferenceStub extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
@@ -24,7 +24,7 @@ export class ReferenceStub extends BaseEntity {
   @Column({ default: 0 })
   value: number;
   @Column({ default: true })
-  enable: boolean;
+  enable: boolean;  
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

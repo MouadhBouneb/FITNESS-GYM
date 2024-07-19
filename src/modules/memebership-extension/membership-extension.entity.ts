@@ -23,17 +23,8 @@ export class MembershipExtension extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-  @ManyToOne(() => Membership, (membership) => membership.membershipExtensions, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => Membership, (membership) => membership.membershipExtensions, {onDelete: 'CASCADE'})
   membership: Membership;
-  @Column()
-  membershipId: number; // Foreign key
-
-  @OneToOne(() => Invoice, (invoice) => invoice.membershipExtension, {
-    onDelete: 'CASCADE'
-  })
+  @OneToOne(() => Invoice, (invoice) => invoice.membershipExtension, {onDelete: 'CASCADE'  })
   invoice: Invoice;
-  @Column()
-  invoiceId: number; // Foreign key
 }

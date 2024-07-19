@@ -6,8 +6,11 @@ export const globalMessages = {
       register: 'Inscription réussie'
     },
     error: {
+      alreadyLiked: 'Post est déja aimé',
+      noWeight: "L'utilisateur n'a pas de poids enregistré",
+      userAlreadyInActivity: 'Vous avez déjà participé à cette activité',
       missingPhoto: 'Il manque une photo dans la requete',
-
+      activityNotFound: 'Impossible de participer à cette activité',
       unableToVerifyToken: 'Impossible de valider le jeton. Veuillez vous connecter de nouveau.',
       wrongCredentials:
         'Identifiants incorrects. Veuillez vérifier votre login et votre mot de passe.',
@@ -20,10 +23,17 @@ export const globalMessages = {
       modificationFailed: 'Modification échouée. Veuillez réessayer plus tard.',
       emptyValues: 'Veuillez renseigner tous les champs.',
       missingLanguage: 'Veuillez fournir une langue',
-      unauthorized: '! L\'action n\'est pas autoriser  !',
-      missingQuery: "La requête est manquante",
+      unauthorized: "! L'action n'est pas autoriser  !",
+      missingQuery: 'La requête est manquante',
       noPostsFound: "Aucun post n'a été trouvé",
-      missingId : "Id est manquant dans la requête",
+      missingId: 'Id est manquant dans la requête',
+      noSubActivities: "Aucune sous activité n'a été trouvée",
+      noPlanAvailable: 'aucun plan disponible',
+      noMembershipisAvailable: 'aucune offre disponible',
+      noMembershiptTypeWithGivenId: 'Impossible de trouver le type de membre donné',
+      noUserMembership:
+        "L'utilisateur n'a pas l'affiliation correcte pour participer à l'activité en cours",
+      invalidHourValue: "Valeur d'heure non valide"
     }
   },
 
@@ -35,6 +45,13 @@ export const globalMessages = {
       checkingForTimeOuts: 'Checking for activity timeouts'
     },
     error: {
+      alreadyLiked: 'Post already liked',
+      noMembershiptTypeWithGivenId: 'Could not find given Membership Type',
+      noWeight: 'User has no recorded weights',
+      userAlreadyInActivity: 'You have already joined this activity',
+      activityNotFound: 'Cannot join this activity',
+      noPlanAvailable: 'No plan available',
+      noSubActivities: 'No sub-activities found',
       missingPhoto: 'Photo is missing from the request',
       unableToVerifyToken: 'Unable to verify token. Please login again.',
       wrongCredentials: 'Incorrect credentials. Please check your username and password.',
@@ -47,9 +64,12 @@ export const globalMessages = {
       emptyValues: 'Please fill in all fields.',
       missingLanguage: 'Please provide a language',
       unauthorized: '! Unauthorized user',
-      missingQuery: "Query is missing from the request",
-      noPostsFound: "No posts found",
-      missingId : "Id is missing from the request",
+      missingQuery: 'Query is missing from the request',
+      noPostsFound: 'No posts found',
+      missingId: 'Id is missing from the request',
+      noMembershipisAvailable: 'No membership is available',
+      noUserMembership: 'User does not have the correct membership to join current activity',
+      invalidHourValue: 'Invalid Hour Value'
     }
   }
 };

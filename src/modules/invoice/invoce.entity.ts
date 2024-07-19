@@ -25,24 +25,18 @@ export class Invoice extends BaseEntity {
   totalTTC: number;
   @Column({ type: 'float' })
   totalHT: number;
-  @Column({ type: 'float' })
+  @Column({ type: 'float',default: 0 })
   discountAmount: number;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-  @ManyToOne(() => User, (user) => user.invoices, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => User, (user) => user.invoices, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user' })
   user: User;
-  @Column()
-  userId: number; // Foreign key
-  @OneToOne(() => MembershipExtension, (membershipExtension) => membershipExtension.invoice, {
-    onDelete: 'CASCADE'
-  })
+  @OneToOne(() => MembershipExtension, (membershipExt) => membershipExt.invoice, { onDelete: 'CASCADE' })
+  @JoinColumn({name:'membership_extension'})
   membershipExtension: MembershipExtension;
-  @Column()
-  membershipExtensionId: number; // Foreign key
   @ManyToOne(() => Taxe)
   @JoinColumn({ name: 'taxeTVA', referencedColumnName: 'code' })
   taxeTVA: Taxe;

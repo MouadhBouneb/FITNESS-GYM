@@ -56,6 +56,11 @@ export class RegisterRequest {
   })
   phone: string;
 
+  @MinLength(1)
+  @MaxLength(150)
+  @IsString()
+  code: string;
+  @IsString()
   @MinLength(8)
   @ApiProperty({
     example: '********',

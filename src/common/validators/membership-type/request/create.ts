@@ -20,14 +20,6 @@ export class CreateMembershipTypeRequest {
     required: true
   })
   nameEn: string;
-  @MinLength(1)
-  @MaxLength(150)
-  @IsString()
-  @ApiProperty({
-    example: 'example',
-    required: true
-  })
-  nameAr: string;
   @ApiProperty({
     example: 'true|false',
     required: false

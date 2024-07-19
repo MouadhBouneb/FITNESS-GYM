@@ -8,7 +8,8 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  JoinColumn
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { MembershipType } from '../membership-type/membership-type.entity';
@@ -20,7 +21,7 @@ export class Membership extends BaseEntity {
   id: number;
   @Column()
   expirationDate: Date;
-  @Column()
+  @Column({nullable:true})
   barCode: string;
   @Column({ default: true })
   enable: boolean;
@@ -28,19 +29,12 @@ export class Membership extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToOne(() => User, (user) => user.memberships, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => User, (user) => user.memberships, {onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'user' })
   user: User;
-  @Column()
-  userId: number; // Foreign key
-  @ManyToOne(() => MembershipType, (membershipType) => membershipType.memberships, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => MembershipType, (membershipType) => membershipType.memberships,{onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'membership_type' })
   membershipType: MembershipType;
-  @Column()
-  membershipTypeId: number; // Foreign key
   @OneToMany(() => MembershipExtension, (membershipExtension) => membershipExtension.membership)
   membershipExtensions: Array<MembershipExtension>;
 }

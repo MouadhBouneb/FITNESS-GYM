@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Post } from '../post/post.entity';
+import { MembershipType } from '../membership-type/membership-type.entity';
 
 @Entity({ name: 'attachements' })
 export class Attachement extends BaseEntity {
@@ -17,17 +18,31 @@ export class Attachement extends BaseEntity {
   @Column()
   name: string;
   @Column()
-  extension: string;
+  mimetype: string;
   @Column()
   path: string;
-  @Column({default: null})
+  @Column({ default: null })
   alt: string;
   @Column({ default: true })
   enable: boolean;
-  @OneToOne(()=>User, (user) => user.photo,{nullable:true,cascade:true, onDelete: 'CASCADE'})
-  user:User
-  @OneToOne(()=>Post, (post) =>post.photo,{nullable:true,cascade:true, onDelete: 'CASCADE'})
-  post:Post
+  @OneToOne(() => User, (user) => user.photo, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE'
+  })
+  user: User;
+  @OneToOne(() => Post, (post) => post.photo, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE'
+  })
+  post: Post;
+  @OneToOne(() => MembershipType, (membershipType) => membershipType.attachement, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE'
+  })
+  memebershipType: MembershipType;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

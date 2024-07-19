@@ -7,7 +7,6 @@ import {
   CreateDateColumn,
   OneToMany,
   OneToOne,
-  AfterUpdate,
   JoinColumn
 } from 'typeorm';
 import { Comment } from '../comment/comment.entity';
@@ -18,9 +17,9 @@ import { Attachement } from '../attachement/attachement.entity';
 export class Post extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 255 })
   title: string;
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 255 })
   content: string;
   @Column({ default: 0, nullable: true })
   numberOfLikes: number;
@@ -32,21 +31,11 @@ export class Post extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
-  @OneToOne(() => Attachement, (photo) => photo.post, { nullable: true})
+  @OneToOne(() => Attachement, (photo) => photo.post, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'photo' })
-  photo: Attachement
-  @OneToMany(() => Comment, (comment) => comment.post, { nullable: true})
-  @JoinColumn({ name: 'comments' })
+  photo: Attachement;
+  @OneToMany(() => Comment, (comment) => comment.post, { nullable: true })
   comments: Array<Comment>;
-  @OneToMany(() => Like, (like) => like.post, { nullable: true})
-  @JoinColumn({ name: 'likes' })
+  @OneToMany(() => Like, (like) => like.post, { nullable: true })
   likes: Array<Like>;
-  @AfterUpdate()
-  updateNumberOfLikes() {
-    if (this.likes) this.numberOfLikes = this.likes?.length;
-  }
-  @AfterUpdate()
-  updateNumberOfComments() {
-    if (this.comments) this.numberOfComments = this.comments.length;
-  }
 }

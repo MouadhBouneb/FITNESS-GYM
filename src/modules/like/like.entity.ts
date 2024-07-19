@@ -6,7 +6,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   ManyToOne,
-  Column
+  JoinColumn,
+
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Post } from '../post/post.entity';
@@ -17,16 +18,10 @@ export class Like extends BaseEntity {
   id: number;
   @CreateDateColumn()
   createdAt: Date;
-  @ManyToOne(() => User, (user) => user.likes, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => User, (user) => user.likes, {onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'user' })
   user: User;
-  @Column()
-  userId: number; // Foreign key
-  @ManyToOne(() => Post, (post) => post.likes, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(() => Post, (post) => post.likes, {onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'post' })
   post: Post;
-  @Column()
-  postId: number; // Foreign key
 }

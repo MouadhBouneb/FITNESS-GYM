@@ -12,8 +12,8 @@ export class UpdateUserRequest {
   })
   fullName: string;
 
-  @MinLength(20)
-  @MaxLength(150)
+  @MinLength(10)
+  @MaxLength(90)
   @IsEmail()
   @IsOptional()
   @ApiProperty({
@@ -22,6 +22,11 @@ export class UpdateUserRequest {
   })
   email: string;
 
+  @MinLength(1)
+  @MaxLength(150)
+  @IsString()
+  @IsOptional()
+  code: string;
   @MinLength(3)
   @MaxLength(150)
   @IsString()
@@ -85,4 +90,9 @@ export class UpdateUserRequest {
     required: false
   })
   enable: boolean;
+
+  @IsOptional()
+  @MinLength(8)
+  @MaxLength(50)
+  password: string;
 }

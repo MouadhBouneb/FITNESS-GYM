@@ -11,6 +11,7 @@ import { Taxe } from './taxe.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Taxe])],
   controllers: [TaxeController],
-  providers: [TaxeService]
+  providers: [TaxeService],
+  exports:[TaxeService]
 })
 export class TaxeModule {}
