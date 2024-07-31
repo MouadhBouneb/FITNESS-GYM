@@ -88,6 +88,14 @@ export class MembershipTypeController {
     }
     return this.membershipTypeService.findAll(language);
   }
+  @Get(':id/photo')
+  getPhoto(@Param('id', ParseIntPipe) id: number, @Headers() headers?: any) {
+    let language: Language = Language[headers?.['accept-language']];
+    if (!language) {
+      language = Language.en;
+    }
+    return this.membershipTypeService.getPhoto(id);
+  }
 
   @Get('without-images')
   getMemebershipTypesWithoutImages(@Headers() headers: any) {
@@ -97,7 +105,7 @@ export class MembershipTypeController {
     }
     return this.membershipTypeService.findAllWithoutImages(language);
   }
-  
+
   @Get(':id')
   @UseGuards(JwtAuthenticationGuard)
   @UsePipes(new ValidationPipe())
@@ -123,8 +131,10 @@ export class MembershipTypeController {
 
     return this.membershipTypeService.deleteById(id);
   }
+
   @Get(':id/prices')
-  getMembershipPrices(@Param('id', ParseIntPipe) id: number) {
-    return this.membershipTypeService.getMembershipPrices(id);
+  async getMembershipPrices(@Param('id', ParseIntPipe) id: number) {
+    const membership = await this.membershipTypeService.getMembershipPrices(id);
+    return membership.membershipPrices;
   }
 }

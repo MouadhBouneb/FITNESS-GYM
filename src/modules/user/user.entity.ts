@@ -12,7 +12,7 @@ import {
   OneToOne,
   JoinColumn,
   ManyToMany,
-  JoinTable,
+  JoinTable
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { IsString, MaxLength, MinLength, IsEmail } from 'class-validator';
@@ -43,7 +43,7 @@ export class User extends BaseEntity {
   @MaxLength(150)
   @IsEmail()
   email: string;
-  @Column({ length: 15 })
+  @Column({ length: 15, nullable: true })
   @MinLength(8)
   @MaxLength(15)
   @IsString()
@@ -74,7 +74,7 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
   @BeforeInsert()
-  async setPassword(password: string) {    
+  async setPassword(password: string) {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(password || this.password, salt);
   }

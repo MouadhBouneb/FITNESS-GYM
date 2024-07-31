@@ -68,7 +68,6 @@ export class MembershipPriceController {
     return this.membershipPriceService.findAll();
   }
   @Get(':id')
-  @UseGuards(JwtAuthenticationGuard)
   @UsePipes(new ValidationPipe())
   @ApiParam({
     name: 'id',

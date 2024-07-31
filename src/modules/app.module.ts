@@ -46,7 +46,6 @@ import { ImageResizeMiddleware } from 'src/common/middlewares/photoResize.middle
     InvoiceModule,
     CommentModule,
     AttachementModule,
-    PlanModule,
     ActivityModule,
     SubActivityModule,
     WeightModule

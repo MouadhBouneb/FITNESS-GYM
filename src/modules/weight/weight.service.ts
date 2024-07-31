@@ -38,7 +38,7 @@ export class WeightService {
     // });
     const weight = await this.weightRepository.query(
       `
-      SELECT w.value, DAY(w.createdAt) as day
+      SELECT w.value, DAY(w.createdAt) as day,createdAt
       FROM weights w
       JOIN (
         SELECT DAY(createdAt) as day, MAX(createdAt) as max_createdAt
@@ -54,7 +54,6 @@ export class WeightService {
     // if (!weight || weight?.length === 0) {
     //   throw new HttpException(globalMessages[language].error.noWeight, HttpStatus.NOT_FOUND);
     // }
-    console.log(weight);
     return weight;
   }
 }

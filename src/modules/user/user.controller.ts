@@ -71,31 +71,31 @@ export class UserController {
       );
     }
 
-    return this.userService.getMemberships(decodedUser.userId);
+    return this.userService.getMemberships(decodedUser.userId,language);
   }
 
-  @Post('join/:id')
-  @UseGuards(JwtAuthenticationGuard)
-  async joinActivity(
-    @Req() request: Request,
-    @Headers() headers: any,
-    @Param('id', new ParseIntPipe()) activityId: number
-  ) {
-    let language: Language = Language[headers?.['accept-language']];
-    if (!language) {
-      language = Language.en;
-    }
-    const token = request.cookies?.Authentication;
-    const decodedUser = await this.jwtService.decode(token);
-    if (!decodedUser) {
-      throw new HttpException(
-        globalMessages[request['lang']].error.unauthorized,
-        HttpStatus.UNAUTHORIZED
-      );
-    }
+  // @Post('join/:id')
+  // @UseGuards(JwtAuthenticationGuard)
+  // async joinActivity(
+  //   @Req() request: Request,
+  //   @Headers() headers: any,
+  //   @Param('id', new ParseIntPipe()) activityId: number
+  // ) {
+  //   let language: Language = Language[headers?.['accept-language']];
+  //   if (!language) {
+  //     language = Language.en;
+  //   }
+  //   const token = request.cookies?.Authentication;
+  //   const decodedUser = await this.jwtService.decode(token);
+  //   if (!decodedUser) {
+  //     throw new HttpException(
+  //       globalMessages[request['lang']].error.unauthorized,
+  //       HttpStatus.UNAUTHORIZED
+  //     );
+  //   }
     
-    return this.userService.joinActivity(language, activityId, decodedUser.userId);
-  }
+  //   return this.userService.joinActivity(language, activityId, decodedUser.userId);
+  // }
 
   @Roles('ROOT', 'ADMIN')
   @Get()

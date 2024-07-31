@@ -7,8 +7,8 @@ export class CreateSubActivityRequest {
   title: string;
 
   @IsString()
-  @MinLength(4)
-  @MaxLength(6)
+  @MinLength(5)
+  @MaxLength(9)
   duration: string;
 
   @IsNumber()

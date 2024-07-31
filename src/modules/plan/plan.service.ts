@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Plan } from './plan.entity';
 import { Repository } from 'typeorm';
-import { EventSubscriber } from 'typeorm';
-@EventSubscriber()
+import { User } from '../user/user.entity';
 @Injectable()
 export class PlanService {
   constructor(
@@ -37,12 +36,19 @@ export class PlanService {
   async disablePlan(id: number) {
     await this.planRepository.update({ id: id }, { enable: false });
   }
-  async getAll(): Promise<Plan[]> {
-    return await this.planRepository.find({
+  async getAll() {
+    const plans = await this.planRepository.find({
       relations: { data: { membershipType: true } },
       where: { enable: true },
       order: { date: 'ASC', data: { hour: 'ASC' } }
     });
+
+    // const plansObj: any[] = plans;
+    // for (const plan of plansObj) {
+    //   for (const activity of plan['activities']) {
+    //   }
+    // }
+    return plans;
     // return await this.planRepository.query(
     //   'SELECT *,activity FROM plans p INNER JOIN activities a ON a.planId=p.id\
     //     INNER JOIN membership_types mt ON mt.id = a.membership_type\

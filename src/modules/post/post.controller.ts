@@ -74,7 +74,9 @@ export class PostController {
     }
     const token = request.cookies?.Authentication;
     const user = await this.authenticationService.verifyToken(language, token);
-
+    if (!user) {
+      throw new HttpException(globalMessages[language].error.unauthorized, HttpStatus.UNAUTHORIZED);
+    }
     return this.postService.getAll(language, query, user);
   }
   @Post('like')

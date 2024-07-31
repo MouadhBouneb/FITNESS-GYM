@@ -55,6 +55,13 @@ export class MembershipTypeService {
     }
     return data;
   }
+  async getPhoto(id: number): Promise<string> {
+    const membershipType = await this.membershipTypeRepository.findOne({
+      relations: { attachement: true },
+      where: { id: id }
+    });
+    return await this.attachmentService.getBase64File(membershipType.attachement);
+  }
   async findById(id: number): Promise<MembershipType> {
     return this.membershipTypeRepository.findOne({
       where: {

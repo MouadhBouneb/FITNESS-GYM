@@ -7,13 +7,10 @@ import { UpdateUserRequest } from '../../common/validators/user/request/update';
 import { globalMessages } from 'src/utils/global-messages';
 import { AttachementService } from '../attachement/attachement.service';
 import { Membership } from '../membership/membership.entity';
-import { ActivityService } from '../activity/activity.service';
 import { Language } from 'src/common/validators/language';
 import { WeightService } from '../weight/weight.service';
-import { Weight } from '../weight/weight.entity';
 import { Activity } from '../activity/activity.entity';
 import * as bcrypt from 'bcrypt';
-import { MembershipType } from '../membership-type/membership-type.entity';
 
 @Injectable()
 export class UserService {
@@ -22,8 +19,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
 
     private readonly weightService: WeightService,
-    private readonly attachmentService: AttachementService,
-    private readonly activityService: ActivityService
+    private readonly attachmentService: AttachementService
   ) {}
 
   async GetOne(id: number) {
@@ -32,6 +28,35 @@ export class UserService {
       where: {
         id: id
       }
+    });
+    return user;
+  }
+  async GetUserWithSpecifiedActivity(userId, actvitiyId): Promise<User> {
+    const userWActivity = await this.userRepository.findOne({
+      relations: ['activities'],
+      where: {
+        id: userId,
+        activities: { id: actvitiyId }
+      }
+    });
+    return userWActivity;
+  }
+  async GetOneWithMemberships(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      relations: {
+        memberships: { membershipType: true }
+      },
+      where: { id: id, memberships: { enable: true } }
+    });
+    return user;
+  }
+  async GetOneWithActivitiesAndMembership(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      relations: {
+        activities: true,
+        memberships: { membershipType: true }
+      },
+      where: { id: id, memberships: { enable: true } }
     });
     return user;
   }
@@ -79,43 +104,38 @@ export class UserService {
     return users;
   }
   async create(language: string, createUserRequest: CreateUserRequest) {
-    try {
-      const verifemail = await this.userRepository.findOneBy({
-        login: createUserRequest.login.toLowerCase()
-      });
-      if (verifemail) {
-        throw new HttpException(
-          globalMessages[language].error.loginAlreadyUsed,
-          HttpStatus.BAD_REQUEST
-        );
-      }
-      const createUser = {
-        fullName: createUserRequest.fullName,
-        email: createUserRequest.email,
-        role: createUserRequest.role,
-        adresse: createUserRequest.adresse,
-        login: createUserRequest.login,
-        code: createUserRequest.code,
-        phone: createUserRequest.phone,
-        password: createUserRequest.password,
-        height: createUserRequest.height,
-        dateOfBirth: createUserRequest.dateOfBirth,
-        weight: null
-      };
-      const user = this.userRepository.create({ ...createUser });
+    const verifemail = await this.userRepository.findOneBy({
+      email: createUserRequest.email.toLowerCase()
+    });
+    console.log(verifemail);
 
-      createUserRequest.weight
-        ? await this.weightService.setUserWeight(user.id, createUserRequest.weight)
-        : null;
-
-      await this.userRepository.save(user);
-      return user;
-    } catch (error) {
+    if (verifemail) {
       throw new HttpException(
-        globalMessages[language].error.registrationFailed,
+        globalMessages[language].error.loginAlreadyUsed,
         HttpStatus.BAD_REQUEST
       );
     }
+    const createUser = {
+      fullName: createUserRequest.fullName,
+      email: createUserRequest.email,
+      role: createUserRequest.role,
+      adresse: createUserRequest.adresse,
+      login: createUserRequest.login,
+      code: createUserRequest.code,
+      phone: createUserRequest.phone,
+      password: createUserRequest.password,
+      height: createUserRequest.height,
+      dateOfBirth: createUserRequest.dateOfBirth,
+      weight: null
+    };
+    const user: User = this.userRepository.create({ ...createUser });
+
+    createUserRequest.weight
+      ? await this.weightService.setUserWeight(user.id, createUserRequest.weight)
+      : null;
+
+    await this.userRepository.save(user);
+    return user;
   }
   async update(language: string, id: number, updateUserRequest: UpdateUserRequest) {
     try {
@@ -209,75 +229,92 @@ export class UserService {
     }
   }
 
-  async getMemberships(id: number): Promise<Membership[]> {
+  async getMemberships(id: number, language: Language): Promise<Membership[]> {
     const user = await this.userRepository.findOne({
       relations: {
         memberships: {
-          membershipExtensions: true
+          membershipExtensions: true,
+          membershipType: { attachement: true }
         }
       },
       where: {
-        id: id
+        id: id,
+        memberships: { enable: true }
       }
     });
-    return user.memberships;
-  }
-
-  async joinActivity(language: Language, activityId: number, userId: number) {
-    const user = await this.userRepository.findOne({
-      relations: {
-        activities: true,
-        memberships: { membershipType: true }
-      },
-      where: { id: userId, memberships: { enable: true } }
-    });
-
-    if (!user)
-      throw new HttpException(globalMessages[language].error.unauthorized, HttpStatus.UNAUTHORIZED);
-    const activity = await this.activityService.getOneEnabledWithMembershipType(activityId);
-
-    if (!activity) {
+    if (!user?.memberships) {
       throw new HttpException(
-        globalMessages[language].error.activityNotFound,
+        globalMessages[language].error.userHasNoMemberships,
         HttpStatus.NOT_FOUND
       );
     }
-    const userWActivity = await this.userRepository.findOne({
-      relations: ['activities'],
-      where: {
-        id: userId,
-        activities: { id: activity.id }
-      }
-    });
-    if (userWActivity) {
-      throw new HttpException(
-        globalMessages[language].error.userAlreadyInActivity,
-        HttpStatus.BAD_REQUEST
+    const membershipList: any[] = [];
+    for (const membership of user.memberships) {
+      const membershipObj: any = membership;
+      membershipObj['daysLeft'] = this.calculateDaysLeft(membership.expirationDate);
+      membershipObj['photo'] = await this.attachmentService.getBase64File(
+        membership.membershipType.attachement
       );
+      membershipList.push(membershipObj);
     }
-
-    const userMemebershipTypeArray = this.makeMembershipTypeArray(user?.memberships);
-    console.log(user);
-
-    if (!userMemebershipTypeArray || userMemebershipTypeArray?.length <= 0)
-      throw new HttpException(
-        globalMessages[language].error.noUserMembership,
-        HttpStatus.UNAUTHORIZED
-      );
-
-    const userHasCorrectMembership = this.verifyUserHasCorrectMembership(
-      userMemebershipTypeArray,
-      activity.membershipType
-    );
-    if (!userHasCorrectMembership)
-      throw new HttpException(
-        globalMessages[language].error.noUserMembership,
-        HttpStatus.UNAUTHORIZED
-      );
-    user.activities = [...user.activities, activity];
-    await this.activityService.updateMemberCount(activity);
-    return user.save();
+    return membershipList;
   }
+
+  // async joinActivity(language: Language, activityId: number, userId: number) {
+  //   const user = await this.userRepository.findOne({
+  //     relations: {
+  //       activities: true,
+  //       memberships: { membershipType: true }
+  //     },
+  //     where: { id: userId, memberships: { enable: true } }
+  //   });
+
+  //   if (!user)
+  //     throw new HttpException(globalMessages[language].error.unauthorized, HttpStatus.UNAUTHORIZED);
+  //   const activity = await this.activityService.getOneEnabledWithMembershipType(activityId);
+
+  //   if (!activity) {
+  //     throw new HttpException(
+  //       globalMessages[language].error.activityNotFound,
+  //       HttpStatus.NOT_FOUND
+  //     );
+  //   }
+  //   const userWActivity = await this.userRepository.findOne({
+  //     relations: ['activities'],
+  //     where: {
+  //       id: userId,
+  //       activities: { id: activity.id }
+  //     }
+  //   });
+  //   if (userWActivity) {
+  //     throw new HttpException(
+  //       globalMessages[language].error.userAlreadyInActivity,
+  //       HttpStatus.BAD_REQUEST
+  //     );
+  //   }
+
+  //   const userMemebershipTypeArray = this.makeMembershipTypeArray(user?.memberships);
+  //   console.log(user);
+
+  //   if (!userMemebershipTypeArray || userMemebershipTypeArray?.length <= 0)
+  //     throw new HttpException(
+  //       globalMessages[language].error.noUserMembership,
+  //       HttpStatus.UNAUTHORIZED
+  //     );
+
+  //   const userHasCorrectMembership = this.verifyUserHasCorrectMembership(
+  //     userMemebershipTypeArray,
+  //     activity.membershipType
+  //   );
+  //   if (!userHasCorrectMembership)
+  //     throw new HttpException(
+  //       globalMessages[language].error.noUserMembership,
+  //       HttpStatus.UNAUTHORIZED
+  //     );
+  //   user.activities = [...user.activities, activity];
+  //   await this.activityService.updateMemberCount(activity);
+  //   return user.save();
+  // }
 
   async getStatistics(id: number, language: Language) {
     const user = await this.userRepository.findOne({
@@ -291,8 +328,15 @@ export class UserService {
     });
     const activities = user.activities;
     const monthWeightObjs = await this.weightService.getLastMonthWeight(id, language);
+    console.log(monthWeightObjs);
+
     let monethWeightVals = new Array(30).fill(0);
     if (monthWeightObjs?.length > 0) monethWeightVals = this.getWeightValues(monthWeightObjs);
+    console.log(monethWeightVals.length);
+    console.log(monethWeightVals.length);
+    console.log(monethWeightVals.length);
+    console.log(monethWeightVals.length);
+
     const totalCaloriesBurnet = this.getColriesBurnet(activities) || 0;
     const totalWeightLost = monethWeightVals[monethWeightVals?.length - 1] - monethWeightVals[1];
     const BMI =
@@ -303,44 +347,39 @@ export class UserService {
     return { activities, monethWeightVals, totalWeightLost, totalCaloriesBurnet, BMI };
   }
 
-  private getWeightValues(weights: Array<Weight>) {
+  private getWeightValues(weights: Array<any>) {
     const monthlyWeight: Array<any> = new Array(weights.values.length);
-    let lastLength = 0;
+    const today = new Date().getDate();
+    const MonthMaxDays = 30;
+
+    const endOfMonth = Math.abs(today - MonthMaxDays) + today;
+    let latestVal = 0;
+
     for (const weight of weights) {
-      monthlyWeight[30 - lastLength - 1] = weight.value;
-      lastLength++;
+      const dayAbsVal = Math.abs(today - endOfMonth) + weight.day;
+      monthlyWeight[
+        dayAbsVal > MonthMaxDays
+          ? dayAbsVal - this.getLastMonthsMaxDays(new Date(dayAbsVal))
+          : dayAbsVal
+      ] = weight.value;
+      latestVal = weight.value;
     }
-
-    const latestVal = monthlyWeight[30 - lastLength];
-    console.log(30 - lastLength, latestVal);
-
-    if (30 - lastLength > 0) {
-      let i = 30 - lastLength;
-      for (i; i >= 0; i--) {
-        monthlyWeight[i] = latestVal;
-      }
+    let i = MonthMaxDays;
+    for (i; i >= 0; i--) {
+      if (monthlyWeight[i] === undefined) monthlyWeight[i] = latestVal;
+      else latestVal = monthlyWeight[i];
     }
-    console.log(monthlyWeight.length);
     return monthlyWeight;
   }
 
-  private verifyUserHasCorrectMembership(
-    userMemberships: Array<MembershipType>,
-    membershipType: MembershipType
-  ) {
-    let sameId = false;
-    userMemberships.forEach((userMembershipType) => {
-      console.log(userMembershipType.id, membershipType.id);
-
-      if (userMembershipType.id === membershipType.id) sameId = true;
-    });
-    return sameId;
+  private calculateDaysLeft(expirationDate: Date) {
+    const today = new Date();
+    const timeDiff = expirationDate.getTime() - today.getTime();
+    return Math.round(timeDiff / (1000 * 3600 * 24));
   }
-  private makeMembershipTypeArray(membershipArray: Array<Membership>) {
-    const membershipTypeArray = [];
-    if (!membershipArray || membershipArray?.length <= 0) return null;
-    membershipArray.forEach((membership) => membershipTypeArray.push(membership.membershipType));
-    return membershipTypeArray;
+  private getLastMonthsMaxDays(inDate: Date) {
+    const date = new Date(inDate);
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   }
   private getColriesBurnet(activities: Array<Activity>) {
     let sumCalories = 0;

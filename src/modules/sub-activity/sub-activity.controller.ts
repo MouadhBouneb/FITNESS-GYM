@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Headers,
+  Param,
+  ParseIntPipe,
   Post,
   UseGuards,
   UsePipes,
@@ -35,6 +38,13 @@ export class SubActivityController {
     }
     return this.subActivityService.create(subActivity, language);
   }
+  @Roles('ADMIN', 'ROOT')
+  @Delete('delete/:id')
+  @UseGuards(JwtAuthenticationGuard, RoleGuard)
+  async deleteSubActivity(@Headers() headers: any, @Param('id', new ParseIntPipe()) id: number) {
+    return await this.subActivityService.deleteSubActivity(id);
+  }
+
   //   @UseGuards(JwtAuthenticationGuard)
   //   @Get('sub-activities')
   //   async getSubActivities(

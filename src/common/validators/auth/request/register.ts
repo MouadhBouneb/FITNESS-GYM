@@ -50,6 +50,7 @@ export class RegisterRequest {
   @MinLength(8)
   @MaxLength(15)
   @IsString()
+  @IsOptional()
   @ApiProperty({
     example: '99999999',
     required: true

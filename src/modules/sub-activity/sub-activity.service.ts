@@ -42,4 +42,7 @@ export class SubActivityService {
   async update(subActivity: SubActivity): Promise<SubActivity> {
     return this.subActivityRepository.save(subActivity);
   }
+  async deleteSubActivity(id: number) {
+    return await this.subActivityRepository.delete({ id: id });
+  }
 }

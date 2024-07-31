@@ -33,7 +33,8 @@ export const globalMessages = {
       noMembershiptTypeWithGivenId: 'Impossible de trouver le type de membre donné',
       noUserMembership:
         "L'utilisateur n'a pas l'affiliation correcte pour participer à l'activité en cours",
-      invalidHourValue: "Valeur d'heure non valide"
+      invalidHourValue: "Valeur d'heure non valide",
+      userHasNoMemberships: "Set utilisateur n'a acune abonnement active"
     }
   },
 
@@ -42,7 +43,8 @@ export const globalMessages = {
       login: 'Logged in successfully',
       logout: 'Logged out successfully',
       register: 'Registration successful',
-      checkingForTimeOuts: 'Checking for activity timeouts'
+      checkingForTimeOuts: 'Checking for activity timeouts',
+      checkingForMembershipTimeouts: 'Checking for membership timeouts'
     },
     error: {
       alreadyLiked: 'Post already liked',
@@ -69,7 +71,8 @@ export const globalMessages = {
       missingId: 'Id is missing from the request',
       noMembershipisAvailable: 'No membership is available',
       noUserMembership: 'User does not have the correct membership to join current activity',
-      invalidHourValue: 'Invalid Hour Value'
+      invalidHourValue: 'Invalid Hour Value',
+      userHasNoMemberships: ' No memberships avilable'
     }
   }
 };

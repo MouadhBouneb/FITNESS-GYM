@@ -11,6 +11,10 @@ import { SubActivity } from '../sub-activity/sub-activity.entity';
 import { UpdateActivityRequest } from 'src/common/validators/activity/request/update';
 import { MembershipTypeService } from '../membership-type/membership-type.service';
 import { Language } from 'src/common/validators/language';
+import { User } from '../user/user.entity';
+import { MembershipType } from '../membership-type/membership-type.entity';
+import { Membership } from '../membership/membership.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ActivityService {
@@ -18,7 +22,8 @@ export class ActivityService {
     @InjectRepository(Activity)
     private activityRepository: Repository<Activity>,
     private readonly planService: PlanService,
-    private readonly membershipTypeService: MembershipTypeService
+    private readonly membershipTypeService: MembershipTypeService,
+    private readonly userService: UserService
   ) {}
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCron() {
@@ -48,6 +53,56 @@ export class ActivityService {
         this.activityRepository.save(latestActivity);
       }
     }
+  }
+  //TODO finish this
+  async getAll(user: User, language: Language) {
+    const plans = await this.planService.getAll();
+    const userMemebershipTypeArray = this.makeMembershipTypeArray(user?.memberships);
+
+    if (!userMemebershipTypeArray || userMemebershipTypeArray?.length <= 0)
+      throw new HttpException(
+        globalMessages[language].error.noUserMembership,
+        HttpStatus.UNAUTHORIZED
+      );
+
+    const plansObj: any[] = plans;
+    for (const plan of plansObj) {
+      for (const activity of plan['data']) {
+        if (
+          this.verifyUserHasCorrectMembership(userMemebershipTypeArray, activity['membershipType'])
+        )
+          activity['disabled'] = false;
+        else activity['disabled'] = true;
+        const userJoinedActivity = await this.checkIfUserJoinedActivity(user.id, activity['id']);
+        console.log(userJoinedActivity);
+
+        if (userJoinedActivity) activity['joined'] = true;
+        else activity['joined'] = false;
+      }
+    }
+    return plansObj;
+  }
+  async joinActivity(language: Language, activity: Activity, user: User) {
+    const userMemebershipTypeArray = this.makeMembershipTypeArray(user?.memberships);
+
+    if (!userMemebershipTypeArray || userMemebershipTypeArray?.length <= 0)
+      throw new HttpException(
+        globalMessages[language].error.noUserMembership,
+        HttpStatus.UNAUTHORIZED
+      );
+
+    const userHasCorrectMembership = this.verifyUserHasCorrectMembership(
+      userMemebershipTypeArray,
+      activity.membershipType
+    );
+    if (!userHasCorrectMembership)
+      throw new HttpException(
+        globalMessages[language].error.noUserMembership,
+        HttpStatus.UNAUTHORIZED
+      );
+    user.activities = [...user.activities, activity];
+    await this.updateMemberCount(activity);
+    return user.save();
   }
 
   async create(activity: CreateActivityRequest, language: Language): Promise<Activity> {
@@ -173,6 +228,15 @@ export class ActivityService {
     }
     return false;
   }
+  async checkIfUserJoinedActivity(userId: number, activityId: number) {
+    const activity = await this.activityRepository.query(
+      `select * from users_activities where usersId=${userId} AND activitiesId=${activityId}`
+    );
+    console.log(activity);
+
+    if (activity && activity?.length > 0) return true;
+    return false;
+  }
   async updateMemberCount(activity: Activity) {
     const participantsCount = activity.numberOfParticipants + 1;
     //Check for max participants if added
@@ -180,5 +244,21 @@ export class ActivityService {
       { id: activity.id },
       { numberOfParticipants: participantsCount }
     );
+  }
+  private verifyUserHasCorrectMembership(
+    userMemberships: Array<MembershipType>,
+    membershipType: MembershipType
+  ) {
+    let sameId = false;
+    userMemberships.forEach((userMembershipType) => {
+      if (userMembershipType.id === membershipType.id) sameId = true;
+    });
+    return sameId;
+  }
+  private makeMembershipTypeArray(membershipArray: Array<Membership>) {
+    const membershipTypeArray = [];
+    if (!membershipArray || membershipArray?.length <= 0) return null;
+    membershipArray.forEach((membership) => membershipTypeArray.push(membership.membershipType));
+    return membershipTypeArray;
   }
 }

@@ -5,10 +5,9 @@ import { PlanService } from './plan.service';
 import { PlanController } from './plan.controller';
 
 @Module({
-    imports:[TypeOrmModule.forFeature([Plan]),],
-    controllers:[PlanController],
-    providers:[PlanService],
-    exports:[PlanService]
-
+  controllers: [PlanController],
+  imports: [TypeOrmModule.forFeature([Plan])],
+  providers: [PlanService],
+  exports: [PlanService]
 })
 export class PlanModule {}
