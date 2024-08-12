@@ -21,8 +21,10 @@ export class Activity extends BaseEntity {
   id: number;
   @Column({ type: 'time' })
   hour: string;
-  @Column({ type: 'time', default: () => '0000' })
+  @Column({ type: 'time', default: () => '000000' })
   duration: string;
+  @Column({ unsigned: true, type: 'int', default: 30 })
+  maxParticipant: number;
   @Column()
   title: string;
   @Column({ type: 'time' })

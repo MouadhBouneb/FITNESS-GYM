@@ -21,8 +21,6 @@ export class Plan extends BaseEntity {
   data: Array<Activity>;
   @Column({ default: true })
   enable: boolean;
-  @Column({ unsigned: true, type: 'int', default: 30 })
-  maxParticipant: number;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

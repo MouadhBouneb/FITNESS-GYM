@@ -41,6 +41,15 @@ export class UserService {
     });
     return userWActivity;
   }
+  async getOneWithActivities(id: number) {
+    const user = await this.userRepository.findOne({
+      relations: {
+        activities: true
+      },
+      where: { id: id }
+    });
+    return user;
+  }
   async GetOneWithMemberships(id: number): Promise<User> {
     const user = await this.userRepository.findOne({
       relations: {
@@ -209,8 +218,11 @@ export class UserService {
     return base64;
   }
   async getPhoto(language: string, id: number) {
-    const user = await this.userRepository.findOne({ relations: ['photo'], where: { id: id } });
-    if (!user) {
+    const user = await this.userRepository.findOne({
+      relations: { photo: true },
+      where: { id: id }
+    });
+    if (!user || !user.photo) {
       throw new HttpException(globalMessages[language].error.userNotFound, HttpStatus.BAD_REQUEST);
     }
     const photo = await this.attachmentService.getBase64File(user.photo);

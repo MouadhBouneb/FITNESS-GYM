@@ -31,6 +31,8 @@ export const globalMessages = {
       noPlanAvailable: 'aucun plan disponible',
       noMembershipisAvailable: 'aucune offre disponible',
       noMembershiptTypeWithGivenId: 'Impossible de trouver le type de membre donné',
+      maxParticipantsReached: "L'activité a atteint le nombre maximum de participants",
+
       noUserMembership:
         "L'utilisateur n'a pas l'affiliation correcte pour participer à l'activité en cours",
       invalidHourValue: "Valeur d'heure non valide",
@@ -47,6 +49,7 @@ export const globalMessages = {
       checkingForMembershipTimeouts: 'Checking for membership timeouts'
     },
     error: {
+      maxParticipantsReached: 'Activity has reached max participants',
       alreadyLiked: 'Post already liked',
       noMembershiptTypeWithGivenId: 'Could not find given Membership Type',
       noWeight: 'User has no recorded weights',

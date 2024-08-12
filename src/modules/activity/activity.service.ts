@@ -36,17 +36,16 @@ export class ActivityService {
       },
       where: { enable: true }
     });
+    const splitHour = latestActivity.endTime.split(':');
     const activityDate = new Date(latestActivity.plan.date);
+    activityDate.setHours(parseInt(splitHour[0]), parseInt(splitHour[1]));
     if (activityDate <= new Date()) {
       const newDate = new Date();
       const timeNow = newDate.getTime();
-      const activityTimeValues = latestActivity.endTime.split(':');
-      const activityTime: Date = new Date();
-      activityTime.setHours(parseInt(activityTimeValues[0]));
-      activityTime.setMinutes(parseInt(activityTimeValues[1]));
-      console.log(timeNow, activityTime.getTime());
 
-      if (timeNow > activityTime.getTime()) {
+      console.log(timeNow, activityDate.getTime());
+
+      if (timeNow > activityDate.getTime()) {
         latestActivity.enable = false;
         console.log('activity disabled', { id: latestActivity.id, name: latestActivity.title });
         await this.checkIfPlanHasActivity(latestActivity.plan.id);
@@ -57,27 +56,37 @@ export class ActivityService {
   //TODO finish this
   async getAll(user: User, language: Language) {
     const plans = await this.planService.getAll();
-    const userMemebershipTypeArray = this.makeMembershipTypeArray(user?.memberships);
+    let userMemebershipTypeArray = this.makeMembershipTypeArray(user?.memberships);
 
-    if (!userMemebershipTypeArray || userMemebershipTypeArray?.length <= 0)
-      throw new HttpException(
-        globalMessages[language].error.noUserMembership,
-        HttpStatus.UNAUTHORIZED
-      );
-
+    if (!userMemebershipTypeArray) userMemebershipTypeArray = [];
+    const today = new Date();
     const plansObj: any[] = plans;
     for (const plan of plansObj) {
+      const inputDate = new Date(plan.date);
+      let isRunnable = false;
+      if (
+        today.getFullYear() === inputDate.getFullYear() &&
+        today.getMonth() === inputDate.getMonth() &&
+        today.getDate() === inputDate.getDate()
+      ) {
+        isRunnable = true;
+      }
       for (const activity of plan['data']) {
         if (
           this.verifyUserHasCorrectMembership(userMemebershipTypeArray, activity['membershipType'])
         )
           activity['disabled'] = false;
         else activity['disabled'] = true;
-        const userJoinedActivity = await this.checkIfUserJoinedActivity(user.id, activity['id']);
+        const userJoinedActivity = await this.checkIfUserJoinedActivity(user?.id, activity?.['id']);
         console.log(userJoinedActivity);
-
+        activity['runnable'] = isRunnable;
         if (userJoinedActivity) activity['joined'] = true;
         else activity['joined'] = false;
+        //you need to join actiivty for it to count in your stats so it's fine to do this to disable the activity
+        if (activity['numberOfParticipants'] >= activity['maxParticipant']) {
+          activity['runnable'] = false;
+          activity['joined'] = true;
+        }
       }
     }
     return plansObj;
@@ -100,6 +109,12 @@ export class ActivityService {
         globalMessages[language].error.noUserMembership,
         HttpStatus.UNAUTHORIZED
       );
+    if (activity?.numberOfParticipants >= activity?.maxParticipant) {
+      throw new HttpException(
+        globalMessages[language].error.maxParticipantsReached,
+        HttpStatus.BAD_REQUEST
+      );
+    }
     user.activities = [...user.activities, activity];
     await this.updateMemberCount(activity);
     return user.save();
@@ -251,7 +266,7 @@ export class ActivityService {
   ) {
     let sameId = false;
     userMemberships.forEach((userMembershipType) => {
-      if (userMembershipType.id === membershipType.id) sameId = true;
+      if (userMembershipType?.id === membershipType?.id) sameId = true;
     });
     return sameId;
   }

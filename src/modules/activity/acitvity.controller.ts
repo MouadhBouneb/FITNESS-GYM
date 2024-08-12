@@ -141,13 +141,8 @@ export class ActivityController {
         HttpStatus.UNAUTHORIZED
       );
     }
-    const user = await this.userService.GetOneWithActivitiesAndMembership(decodedUser.id);
-    if (!user) {
-      throw new HttpException(
-        globalMessages[request['lang']].error.unauthorized,
-        HttpStatus.UNAUTHORIZED
-      );
-    }
+    let user = await this.userService.GetOneWithActivitiesAndMembership(decodedUser.id);
+    if (!user) user = await this.userService.getOneWithActivities(decodedUser.id);
     return await this.activityService.getAll(user, language);
   }
 }

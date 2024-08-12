@@ -16,7 +16,7 @@ export class AuthentificationService {
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
-  ) { }
+  ) {}
 
   public getCookieWithJwtToken(userId: number, role: string) {
     const payload: TokenPayload = { userId, role };
@@ -26,13 +26,12 @@ export class AuthentificationService {
     )}`;
   }
 
-
   public async register(language: string, registrationData: CreateUserRequest): Promise<any> {
     const createdUser = await this.usersService.create(language, registrationData);
     createdUser.password = undefined;
     console.log(createdUser);
     const token = this.getCookieWithJwtToken(createdUser.id, createdUser.role);
-    return { "user": createdUser, "token": token };
+    return { user: createdUser, token: token };
   }
 
   public async getAuthenticatedUser(
@@ -69,21 +68,16 @@ export class AuthentificationService {
   public getCookieForLogOut() {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
-  public async verifyToken(
-    language: string,
-    cookie: string
-  ) {
-
-    const decodedUser = this.jwtService.decode(cookie)
+  public async verifyToken(language: string, cookie: string) {
+    const decodedUser = this.jwtService.decode(cookie);
     if (!decodedUser) {
       throw new HttpException(
         globalMessages[language].error.unableToVerifyToken,
         HttpStatus.BAD_REQUEST
       );
     }
-    const user = await this.usersService.GetOne(decodedUser.id);
-    console.log(user);
-    
+    const user = await this.usersService.GetOne(decodedUser.userId);
+
     if (!user) {
       throw new HttpException(
         globalMessages[language].error.unableToVerifyToken,
@@ -92,5 +86,4 @@ export class AuthentificationService {
     }
     return user;
   }
-
 }

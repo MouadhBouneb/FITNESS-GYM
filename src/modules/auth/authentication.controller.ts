@@ -74,6 +74,7 @@ export class AuthenticationController {
   @Post('log-out')
   async logOut(@Req() request: RequestWithUser, @Res() response: Response) {
     response.setHeader('set-cookie', this.authenticationService.getCookieForLogOut());
+    
     return response.sendStatus(200);
   }
 

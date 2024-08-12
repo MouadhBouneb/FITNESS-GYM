@@ -39,7 +39,7 @@ export class PlanService {
   async getAll() {
     const plans = await this.planRepository.find({
       relations: { data: { membershipType: true } },
-      where: { enable: true },
+      where: { enable: true, data: { enable: true } },
       order: { date: 'ASC', data: { hour: 'ASC' } }
     });
 
